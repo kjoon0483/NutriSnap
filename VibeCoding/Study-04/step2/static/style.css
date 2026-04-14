@@ -1,0 +1,191 @@
+/* 생성일시: 2026-04-07 14:10 */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
+  padding: 40px 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+h1 { font-size: 1.8rem; color: #1a1a2e; }
+.subtitle { color: #888; font-size: 0.9rem; margin-top: -12px; }
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.step-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #4a90e2;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* 업로드 */
+.upload-area {
+  border: 2px dashed #a0c4ff;
+  border-radius: 12px;
+  padding: 28px;
+  text-align: center;
+  cursor: pointer;
+  background: #f7fbff;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+.upload-area:hover, .upload-area.dragover {
+  border-color: #4a90e2;
+  background: #eaf3ff;
+}
+.upload-icon { font-size: 2.2rem; display: block; margin-bottom: 8px; }
+#placeholder p { color: #999; font-size: 0.88rem; }
+.preview-img { max-width: 100%; max-height: 260px; border-radius: 8px; object-fit: contain; }
+
+/* 버튼 */
+.btn {
+  background: #4a90e2;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+.btn:hover:not(:disabled) { background: #357abd; }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn.loading { opacity: 0.6; cursor: wait; }
+.btn-green { background: #27ae60; }
+.btn-green:hover:not(:disabled) { background: #1e8449; }
+
+/* 재료 태그 */
+.tag-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 36px;
+}
+.tag {
+  background: #eaf3ff;
+  color: #2c6fad;
+  border: 1px solid #a0c4ff;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tag .remove {
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: #999;
+  line-height: 1;
+}
+.tag .remove:hover { color: #e74c3c; }
+
+.tag-input-row {
+  display: flex;
+  gap: 8px;
+}
+.tag-input-row input {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 0.9rem;
+  outline: none;
+}
+.tag-input-row input:focus { border-color: #4a90e2; }
+.btn-small {
+  background: #4a90e2;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-small:hover { background: #357abd; }
+
+/* 레시피 카드 */
+#recipeSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.recipe-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.recipe-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+}
+.recipe-card h3 {
+  font-size: 1.1rem;
+  color: #1a1a2e;
+  margin-bottom: 12px;
+}
+.recipe-card .section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #27ae60;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  margin-top: 12px;
+}
+.recipe-card .ing-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.recipe-card .ing-list span {
+  background: #f0fff4;
+  color: #1e8449;
+  border: 1px solid #a9dfbf;
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 0.82rem;
+}
+.recipe-card ol {
+  padding-left: 18px;
+  color: #444;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+/* 에러 */
+.error-msg {
+  background: #fff0f0;
+  color: #c0392b;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.88rem;
+}

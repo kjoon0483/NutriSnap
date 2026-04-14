@@ -1,0 +1,92 @@
+<!-- 생성일시: 2026-04-07 14:10 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>냉장고를 부탁해</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <span class="logo">🧊 냉장고를 부탁해</span>
+    <nav>
+      <button class="tab-btn active" data-tab="main">홈</button>
+      <button class="tab-btn" data-tab="saved">즐겨찾기</button>
+      <button class="tab-btn" data-tab="profile">프로필</button>
+    </nav>
+  </header>
+
+  <!-- 홈 탭 -->
+  <main id="tab-main" class="tab-content active">
+
+    <section class="card">
+      <h2 class="step-label">STEP 1 &nbsp; 재료 인식</h2>
+      <div class="upload-area" id="uploadArea" role="button" aria-label="냉장고 사진 업로드 영역. 클릭하거나 사진을 드래그하세요" tabindex="0">
+        <input type="file" id="fileInput" accept="image/*" hidden />
+        <div id="placeholder">
+          <span class="upload-icon">📷</span>
+          <p>클릭하거나 사진을 드래그하세요</p>
+        </div>
+        <img id="preview" class="preview-img" hidden />
+      </div>
+      <button class="btn" id="analyzeBtn" disabled>사진으로 재료 인식</button>
+    </section>
+
+    <section class="card">
+      <h2 class="step-label">STEP 2 &nbsp; 재료 확인 및 편집</h2>
+      <div class="tag-area" id="tagArea"></div>
+      <div class="tag-input-row">
+        <input type="text" id="tagInput" placeholder="재료 직접 추가..." aria-label="재료 직접 입력" />
+        <button class="btn-small" id="addTagBtn">추가</button>
+      </div>
+      <button class="btn btn-green" id="recipeBtn">레시피 추천받기</button>
+    </section>
+
+    <section id="recipeSection" hidden>
+      <h2 class="step-label">추천 레시피</h2>
+      <div id="recipeGrid"></div>
+    </section>
+
+    <div class="error-msg" id="errorMsg" hidden></div>
+  </main>
+
+  <!-- 즐겨찾기 탭 -->
+  <main id="tab-saved" class="tab-content">
+    <h2 class="step-label" style="padding: 8px 0">저장된 레시피</h2>
+    <div id="savedGrid"></div>
+    <p id="savedEmpty" class="empty-msg">저장된 레시피가 없습니다.</p>
+  </main>
+
+  <!-- 프로필 탭 -->
+  <main id="tab-profile" class="tab-content">
+    <section class="card">
+      <h2 class="step-label">내 프로필</h2>
+
+      <label class="field-label">식단 유형</label>
+      <div class="radio-group">
+        <label><input type="radio" name="diet" value="일반" checked /> 일반</label>
+        <label><input type="radio" name="diet" value="채식" /> 채식</label>
+        <label><input type="radio" name="diet" value="비건" /> 비건</label>
+      </div>
+
+      <label class="field-label">선호 요리 스타일</label>
+      <div class="radio-group">
+        <label><input type="radio" name="style" value="" checked /> 상관없음</label>
+        <label><input type="radio" name="style" value="한식" /> 한식</label>
+        <label><input type="radio" name="style" value="양식" /> 양식</label>
+        <label><input type="radio" name="style" value="중식" /> 중식</label>
+        <label><input type="radio" name="style" value="일식" /> 일식</label>
+      </div>
+
+      <label class="field-label">알레르기 재료 <small>(쉼표로 구분)</small></label>
+      <input type="text" id="allergiesInput" placeholder="예: 견과류, 유제품, 밀가루" />
+
+      <button class="btn btn-green" id="saveProfileBtn">프로필 저장</button>
+      <p class="save-confirm" id="profileSaved" hidden>✓ 저장되었습니다</p>
+    </section>
+  </main>
+
+  <script src="/static/main.js"></script>
+</body>
+</html>

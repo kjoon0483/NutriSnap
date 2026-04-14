@@ -1,0 +1,51 @@
+<!-- 생성일시: 2026-04-07 14:10 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>냉장고를 부탁해</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🧊 냉장고를 부탁해</h1>
+    <p class="subtitle">냉장고 사진을 올리거나 재료를 직접 입력하세요</p>
+
+    <!-- STEP 1: 이미지 업로드 -->
+    <section class="card">
+      <h2 class="step-label">STEP 1 &nbsp; 재료 인식</h2>
+      <div class="upload-area" id="uploadArea">
+        <input type="file" id="fileInput" accept="image/*" hidden />
+        <div id="placeholder">
+          <span class="upload-icon">📷</span>
+          <p>클릭하거나 사진을 드래그하세요</p>
+        </div>
+        <img id="preview" class="preview-img" hidden />
+      </div>
+      <button class="btn" id="analyzeBtn" disabled>사진으로 재료 인식</button>
+    </section>
+
+    <!-- STEP 2: 재료 편집 -->
+    <section class="card" id="ingredientSection">
+      <h2 class="step-label">STEP 2 &nbsp; 재료 확인 및 편집</h2>
+      <div class="tag-area" id="tagArea"></div>
+      <div class="tag-input-row">
+        <input type="text" id="tagInput" placeholder="재료 직접 추가..." />
+        <button class="btn-small" id="addTagBtn">추가</button>
+      </div>
+      <button class="btn btn-green" id="recipeBtn">레시피 추천받기</button>
+    </section>
+
+    <!-- STEP 3: 레시피 카드 -->
+    <section id="recipeSection" hidden>
+      <h2 class="step-label">추천 레시피</h2>
+      <div class="recipe-grid" id="recipeGrid"></div>
+    </section>
+
+    <div class="error-msg" id="errorMsg" hidden></div>
+  </div>
+
+  <script src="/static/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!-- 생성일시: 2026-04-07 14:10 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>냉장고를 부탁해</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🧊 냉장고를 부탁해</h1>
+    <p class="subtitle">냉장고 사진을 올리면 AI가 재료를 인식해드려요</p>
+
+    <!-- 업로드 영역 -->
+    <div class="upload-area" id="uploadArea">
+      <input type="file" id="fileInput" accept="image/*" hidden />
+      <div class="upload-placeholder" id="placeholder">
+        <span class="upload-icon">📷</span>
+        <p>클릭하거나 사진을 여기에 드래그하세요</p>
+      </div>
+      <img id="preview" class="preview-img" hidden />
+    </div>
+
+    <button class="btn" id="analyzeBtn" disabled>분석하기</button>
+
+    <!-- 결과 영역 -->
+    <div class="result-area" id="resultArea" hidden>
+      <h2>인식된 재료</h2>
+      <ul class="ingredient-list" id="ingredientList"></ul>
+    </div>
+
+    <div class="error-msg" id="errorMsg" hidden></div>
+  </div>
+
+  <script src="/static/main.js"></script>
+</body>
+</html>
