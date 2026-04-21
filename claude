@@ -1,0 +1,4 @@
+#!/bin/bash
+yum install httpd php -y
+aws s3 cp s3://sgu-202601-s3/index.php /var/www/html --region ap-northeast-2
+systemctl restart httpd
