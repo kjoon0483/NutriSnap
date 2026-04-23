@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# 과거 날짜로 커밋을 생성하는 스크립트
+# 사용법: bash grass.sh
+
+mkdir grass && cd grass
+git init
+
+for i in $(seq 1 100); do
+  DATE=$(date -d "$((RANDOM % 365)) days ago" '+%Y-%m-%dT12:00:00')
+  echo "$DATE - commit $i" >> log.txt
+  git add .
+  GIT_AUTHOR_DATE="$DATE" GIT_COMMITTER_DATE="$DATE" git commit -m "commit $i"
+done
+
+# 리모트 추가 후 푸시
+# git remote add origin https://github.com/USERNAME/REPO.git
+# git push -u origin main
