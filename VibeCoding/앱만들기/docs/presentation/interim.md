@@ -8,37 +8,122 @@ header: "NutriSnap — 중간 발표"
 footer: "AI 식단·칼로리 트래커 | kjoon0483"
 ---
 
+<!-- _class: lead -->
+
+<style scoped>
+section {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: white;
+  text-align: center;
+}
+h1 { font-size: 3.2em; font-weight: 900; letter-spacing: -2px; margin-bottom: 0.1em; }
+h2 { font-size: 1.3em; font-weight: 400; opacity: 0.85; }
+p  { margin-top: 1em; opacity: 0.75; font-size: 0.9em; }
+</style>
+
 # NutriSnap
 ## AI 식단·칼로리 트래커
 
-사진 한 장으로 음식을 인식하고
-칼로리와 영양소를 자동 계산하는 모바일 앱
+사진 한 장으로 음식을 인식하고 칼로리와 영양소를 자동 계산하는 모바일 앱
 
 ---
+
+<style scoped>
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 24px;
+}
+.problem-card {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px 20px;
+  text-align: center;
+}
+.problem-card .num {
+  font-size: 2em;
+  font-weight: 900;
+  color: #16a34a;
+  display: block;
+  margin-bottom: 8px;
+}
+.problem-card h3 { font-size: 1em; font-weight: 700; margin-bottom: 8px; }
+.problem-card p  { font-size: 0.82em; color: #64748b; line-height: 1.5; }
+.hypothesis {
+  margin-top: 20px;
+  background: #dcfce7;
+  border-left: 4px solid #16a34a;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.88em;
+  color: #166534;
+  text-align: left;
+}
+</style>
 
 ## 문제 정의
 
-- 식단 기록은 귀찮고 시간이 많이 걸린다
-- 칼로리를 일일이 검색해야 해서 꾸준히 하기 어렵다
-- 영양 불균형 여부를 직관적으로 파악하기 힘들다
+<div class="problem-grid">
+  <div class="problem-card">
+    <span class="num">01</span>
+    <h3>기록이 귀찮다</h3>
+    <p>음식명과 양을 매번 직접 입력해야 해서 지속하기 어렵다</p>
+  </div>
+  <div class="problem-card">
+    <span class="num">02</span>
+    <h3>검색이 번거롭다</h3>
+    <p>칼로리를 일일이 검색해야 해서 꾸준한 관리가 힘들다</p>
+  </div>
+  <div class="problem-card">
+    <span class="num">03</span>
+    <h3>균형 파악이 어렵다</h3>
+    <p>영양 불균형 여부를 직관적으로 확인할 방법이 없다</p>
+  </div>
+</div>
 
-> **핵심 가설:** 사진 찍기만 하면 자동으로 기록된다면, 식단 관리를 꾸준히 할 수 있다.
+<div class="hypothesis">
+  💡 핵심 가설 — 사진 찍기만 하면 자동으로 기록된다면, 식단 관리를 꾸준히 할 수 있다
+</div>
 
 ---
 
+<style scoped>
+.flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+.step {
+  background: #f1f5f9;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 18px;
+  text-align: center;
+  min-width: 120px;
+}
+.step .emoji { font-size: 1.6em; display: block; margin-bottom: 4px; }
+.step span   { font-size: 0.78em; font-weight: 600; color: #334155; }
+.arrow { font-size: 1.4em; color: #94a3b8; }
+</style>
+
 ## 솔루션
 
-```
-음식 사진 촬영
-    ↓
-Claude Vision AI 자동 인식
-    ↓
-칼로리 · 영양소 결과 표시
-    ↓
-수정 후 저장 → 하루 식단 누적
-    ↓
-주간 리포트 차트
-```
+<div class="flow">
+  <div class="step"><span class="emoji">📷</span><span>음식 촬영</span></div>
+  <span class="arrow">→</span>
+  <div class="step"><span class="emoji">🤖</span><span>AI 자동 인식</span></div>
+  <span class="arrow">→</span>
+  <div class="step"><span class="emoji">🔢</span><span>칼로리 계산</span></div>
+  <span class="arrow">→</span>
+  <div class="step"><span class="emoji">✏️</span><span>수정 & 저장</span></div>
+  <span class="arrow">→</span>
+  <div class="step"><span class="emoji">📊</span><span>주간 리포트</span></div>
+</div>
 
 ---
 

@@ -1,0 +1,375 @@
+<!-- 생성일시: 2026-05-19 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NutriSnap — AI 식단·칼로리 트래커</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+      color: white;
+      padding: 72px 24px 56px;
+      text-align: center;
+    }
+    .hero h1 { font-size: 3rem; font-weight: 800; letter-spacing: -1px; }
+    .hero p  { font-size: 1.2rem; margin-top: 12px; opacity: 0.9; }
+    .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 999px;
+      padding: 4px 16px;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+
+    /* Layout */
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 56px 0; }
+    section + section { border-top: 1px solid #e2e8f0; }
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h2 .icon {
+      width: 36px; height: 36px;
+      background: #dcfce7;
+      color: #16a34a;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    /* Problem cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .card .num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #dcfce7;
+      -webkit-text-stroke: 2px #16a34a;
+      margin-bottom: 8px;
+    }
+    .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .card p  { font-size: 0.9rem; color: #64748b; }
+
+    /* Vision */
+    .vision-box {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .vision-box .tagline {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #16a34a;
+      margin-bottom: 12px;
+    }
+    .vision-box p { color: #475569; }
+
+    /* Flow */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+    .flow-step {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .flow-arrow { color: #94a3b8; font-size: 1.2rem; }
+
+    /* WBS */
+    .wbs { list-style: none; }
+    .wbs > li {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .wbs-title {
+      padding: 16px 20px;
+      font-weight: 700;
+      font-size: 1rem;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .wbs-title .dot {
+      width: 10px; height: 10px;
+      background: #16a34a;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .wbs-children {
+      padding: 12px 20px 16px 40px;
+      display: none;
+    }
+    .wbs-children.open { display: block; }
+    .wbs-children li {
+      font-size: 0.9rem;
+      color: #475569;
+      padding: 4px 0;
+      border-left: 2px solid #dcfce7;
+      padding-left: 12px;
+      margin-bottom: 4px;
+    }
+    .wbs-children li::before { content: "— "; color: #94a3b8; }
+
+    /* Schedule */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    th {
+      background: #16a34a;
+      color: white;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.9rem;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) td { background: #f8fafc; }
+    .badge-mid {
+      background: #fef9c3;
+      color: #854d0e;
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .badge-final {
+      background: #dcfce7;
+      color: #166534;
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    /* Links */
+    .links { display: flex; flex-wrap: wrap; gap: 12px; }
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #334155;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .link-btn:hover {
+      border-color: #16a34a;
+      box-shadow: 0 0 0 3px #dcfce7;
+    }
+
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      border-top: 1px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">앱프로그래밍응용 · 1인 팀 · kjoon0483</div>
+  <h1>NutriSnap</h1>
+  <p>사진 한 장으로 음식을 인식하고, AI가 칼로리와 영양소를 분석해주는 모바일 앱</p>
+</div>
+
+<div class="container">
+
+  <!-- 문제 정의 -->
+  <section>
+    <h2><span class="icon">⚠</span> 문제 정의</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="num">01</div>
+        <h3>기록이 귀찮다</h3>
+        <p>음식명과 양을 매번 직접 입력해야 해서 지속하기 어렵다</p>
+      </div>
+      <div class="card">
+        <div class="num">02</div>
+        <h3>검색이 번거롭다</h3>
+        <p>칼로리를 일일이 검색해야 해서 꾸준한 식단 관리가 힘들다</p>
+      </div>
+      <div class="card">
+        <div class="num">03</div>
+        <h3>균형 파악이 어렵다</h3>
+        <p>영양 불균형 여부를 직관적으로 확인할 방법이 없다</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 비전 & 솔루션 -->
+  <section>
+    <h2><span class="icon">✦</span> 비전 & 솔루션</h2>
+    <div class="vision-box">
+      <div class="tagline">사진 한 장 → 자동 분석 → 식단 기록 완료</div>
+      <p>카메라로 음식을 찍으면 Claude Vision AI가 자동으로 인식하고 칼로리·영양소를 계산합니다.<br>사용자는 결과를 확인하고 수정하기만 하면 됩니다.</p>
+    </div>
+    <div class="flow">
+      <div class="flow-step">📷 음식 촬영</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">🤖 Claude Vision 인식</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">🔢 칼로리 계산</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">✏️ 수정 & 저장</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">📊 주간 리포트</div>
+    </div>
+  </section>
+
+  <!-- WBS -->
+  <section>
+    <h2><span class="icon">📋</span> WBS</h2>
+    <ul class="wbs">
+      <li>
+        <div class="wbs-title" onclick="toggle(this)"><span class="dot"></span>1. 프로젝트 관리</div>
+        <ul class="wbs-children">
+          <li>비전·요구사항 문서</li>
+          <li>아키텍처 문서 + ADR 3개</li>
+          <li>중간·최종 발표 자료</li>
+        </ul>
+      </li>
+      <li>
+        <div class="wbs-title" onclick="toggle(this)"><span class="dot"></span>2. 환경 설정</div>
+        <ul class="wbs-children">
+          <li>Node.js + Expo CLI 설치</li>
+          <li>TypeScript 설정</li>
+          <li>Claude API 키 설정</li>
+          <li>핵심 패키지 설치 (@anthropic-ai/sdk, expo-image-picker, AsyncStorage)</li>
+        </ul>
+      </li>
+      <li>
+        <div class="wbs-title" onclick="toggle(this)"><span class="dot"></span>3. 핵심 기능 개발</div>
+        <ul class="wbs-children">
+          <li>카메라·갤러리 이미지 선택 UI</li>
+          <li>Claude Vision API 호출 및 응답 파싱</li>
+          <li>인식 결과 수정 UI</li>
+          <li>하루 식단 기록 목록 화면</li>
+          <li>칼로리·영양소 계산 로직</li>
+          <li>AsyncStorage 저장·불러오기</li>
+        </ul>
+      </li>
+      <li>
+        <div class="wbs-title" onclick="toggle(this)"><span class="dot"></span>4. 시각화 & 리포트</div>
+        <ul class="wbs-children">
+          <li>목표 칼로리 Progress Bar</li>
+          <li>탄·단·지 도넛 차트</li>
+          <li>주간 칼로리 막대 차트</li>
+        </ul>
+      </li>
+      <li>
+        <div class="wbs-title" onclick="toggle(this)"><span class="dot"></span>5. 테스트 & 품질</div>
+        <ul class="wbs-children">
+          <li>한식 10종 인식 정확도 테스트</li>
+          <li>에러 처리 (API 실패·오프라인)</li>
+          <li>로딩 UI</li>
+        </ul>
+      </li>
+    </ul>
+  </section>
+
+  <!-- 일정 -->
+  <section>
+    <h2><span class="icon">📅</span> 6주 일정</h2>
+    <table>
+      <thead>
+        <tr><th>주차</th><th>목표</th><th>핵심 산출물</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>10주차</td><td>기획·문서·환경 설정</td><td>planning/ 문서, Expo 초기화</td></tr>
+        <tr><td>11주차</td><td>음식 인식 핵심 기능</td><td>Claude Vision API 연동</td></tr>
+        <tr><td>12주차</td><td>식단 기록 + <span class="badge-mid">중간 발표</span></td><td>홈 화면, 저장 기능</td></tr>
+        <tr><td>13주차</td><td>차트·영양소 분석</td><td>도넛·막대 차트</td></tr>
+        <tr><td>14주차</td><td>마감·문서 완성</td><td>배포, 전체 문서</td></tr>
+        <tr><td>15주차</td><td><span class="badge-final">최종 발표</span></td><td>발표 자료, 데모</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 문서 링크 -->
+  <section>
+    <h2><span class="icon">🔗</span> 문서</h2>
+    <div class="links">
+      <a class="link-btn" href="architecture.md">📐 아키텍처</a>
+      <a class="link-btn" href="setup.md">⚙️ 환경 설정</a>
+      <a class="link-btn" href="deploy.md">🚀 배포</a>
+      <a class="link-btn" href="testing.md">🧪 테스트</a>
+      <a class="link-btn" href="presentation/interim.md">🎤 중간 발표</a>
+    </div>
+  </section>
+
+</div>
+
+<footer>NutriSnap · kjoon0483 · 앱프로그래밍응용 2026</footer>
+
+<script>
+  function toggle(el) {
+    const children = el.nextElementSibling;
+    children.classList.toggle('open');
+  }
+  // 첫 번째 항목 기본으로 열기
+  document.querySelectorAll('.wbs-children')[0].classList.add('open');
+</script>
+
+</body>
+</html>
