@@ -127,33 +127,66 @@ p  { margin-top: 1em; opacity: 0.75; font-size: 0.9em; }
 
 ---
 
-## 기술 스택 선택 (ADR 기반)
+## 아키텍처
 
-| 선택 | 이유 |
-|---|---|
-| **React Native + Expo** | JS 기반 — 기존 언어 재활용, Expo Go로 즉시 테스트 |
-| **Claude API (Vision)** | 한국 음식 인식 품질 우수, 공식 JS SDK 사용 가능 |
-| **AsyncStorage** | 서버 없이 기기 내 저장 — 6주 일정에 적합 |
+```mermaid
+graph LR
+    User([👤 사용자])
 
-> 모든 결정은 `.planning/decisions/ADR-000*.md` 에 근거 기록
+    subgraph App ["📱 앱 (React Native + Expo)"]
+        UI["Presentation\napp/ 화면"]
+        API["api/claude.ts"]
+        Store["storage/mealStorage.ts"]
+        Util["utils/nutrition.ts"]
+    end
+
+    Claude[(☁️ Claude API)]
+    DB[(📦 AsyncStorage)]
+
+    User --> UI
+    UI --> API --> Claude
+    Claude --> API --> UI
+    UI --> Store <--> DB
+    UI --> Util
+```
 
 ---
 
-## 프로젝트 구조
+<style scoped>
+.adr-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 20px; }
+.adr-card { border-radius: 14px; padding: 20px; border: 2px solid #e2e8f0; background: white; }
+.adr-card .label { font-size: 0.7em; font-weight: 700; color: #16a34a; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.adr-card h3 { font-size: 0.95em; font-weight: 700; margin-bottom: 10px; }
+.adr-card .chosen { background: #dcfce7; color: #166534; border-radius: 8px; padding: 4px 10px; font-size: 0.82em; font-weight: 700; display: inline-block; margin-bottom: 8px; }
+.adr-card .alt { font-size: 0.78em; color: #94a3b8; margin-bottom: 6px; }
+.adr-card .reason { font-size: 0.8em; color: #475569; border-left: 3px solid #16a34a; padding-left: 8px; }
+</style>
 
-```
-nutrisnap/
-├── app/              # 화면 (Expo Router)
-├── src/
-│   ├── api/          # Claude Vision API 호출
-│   ├── storage/      # AsyncStorage (식단 저장)
-│   ├── utils/        # 칼로리 계산
-│   └── types/        # TypeScript 타입
-├── docs/             # 운영 문서
-└── .planning/        # 기획 문서 + ADR
-```
+## ADR — 핵심 의사결정 3가지
 
-> Presentation → Application → Data 레이어 구조 적용
+<div class="adr-grid">
+  <div class="adr-card">
+    <div class="label">ADR-0001 · 플랫폼</div>
+    <h3>모바일 프레임워크</h3>
+    <span class="chosen">✅ React Native + Expo</span>
+    <div class="alt">vs Flutter · 네이티브</div>
+    <div class="reason">기존 JS 지식 재활용 + Claude 공식 JS SDK 사용 가능</div>
+  </div>
+  <div class="adr-card">
+    <div class="label">ADR-0002 · AI</div>
+    <h3>Vision AI API</h3>
+    <span class="chosen">✅ Claude API</span>
+    <div class="alt">vs GPT-4 Vision · Gemini</div>
+    <div class="reason">한식 인식 품질 우수 + JSON 응답 안정성 높음</div>
+  </div>
+  <div class="adr-card">
+    <div class="label">ADR-0003 · 저장소</div>
+    <h3>데이터 저장</h3>
+    <span class="chosen">✅ AsyncStorage</span>
+    <div class="alt">vs Firebase · 자체 서버</div>
+    <div class="reason">서버 없이 기기 내 저장 — 6주 일정 내 구현 가능</div>
+  </div>
+</div>
 
 ---
 
