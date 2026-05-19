@@ -6,6 +6,42 @@
 
 사진 한 장으로 음식을 인식하고 칼로리·영양소를 자동 계산하는 AI 식단 트래커 모바일 앱.
 
+## 시스템 다이어그램
+
+```mermaid
+graph TD
+    User([👤 사용자])
+
+    subgraph Presentation ["📱 Presentation Layer (app/)"]
+        Home["홈 화면\n오늘 식단 + 칼로리"]
+        Add["추가 화면\n사진 촬영/선택"]
+        Report["리포트 화면\n주간 차트"]
+    end
+
+    subgraph Data ["🗄️ Data Layer (src/)"]
+        ClaudeAPI["api/claude.ts\nVision API 호출"]
+        Storage["storage/mealStorage.ts\nAsyncStorage CRUD"]
+        Utils["utils/nutrition.ts\n칼로리 계산"]
+    end
+
+    subgraph External ["☁️ 외부"]
+        Claude[(Claude API\nclaude-opus-4-7)]
+        Local[(AsyncStorage\n기기 내 저장)]
+    end
+
+    User --> Add
+    Add -->|이미지 Base64| ClaudeAPI
+    ClaudeAPI -->|Vision 요청| Claude
+    Claude -->|음식명·칼로리·영양소| ClaudeAPI
+    ClaudeAPI -->|FoodItem| Add
+    Add -->|저장| Storage
+    Storage <-->|읽기/쓰기| Local
+    Storage -->|Meal 목록| Home
+    Home -->|누적 데이터| Utils
+    Utils -->|합산 결과| Home
+    Storage -->|주간 데이터| Report
+```
+
 ## 기술 스택
 
 | 구분 | 기술 | 버전 |
