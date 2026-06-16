@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriSnap — AI 식단 관리 앱</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --forest:#1A3D1C;--green:#2C5F2D;--moss:#97BC62;
+  --light:#F4F9F4;--white:#fff;--text:#1a1a1a;--muted:#555;
+  --blue:#1565C0;--red:#E53935;--orange:#F57C00;--purple:#6A1B9A;
+  --dur:0.55s;--ease:cubic-bezier(.22,1,.36,1);
+}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans KR',sans-serif;background:#000}
+.deck{position:relative;width:100vw;height:100vh;overflow:hidden}
+
+/* ── Slides ── */
+.slide{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;padding:4vw;
+  opacity:0;pointer-events:none;
+  transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease);
+  transform:translateX(60px);
+}
+.slide.active{opacity:1;pointer-events:auto;transform:translateX(0)}
+.slide.exit{opacity:0;transform:translateX(-60px)}
+.slide.dark{background:var(--forest);color:var(--white)}
+.slide.light{background:var(--light);color:var(--text)}
+
+/* ── Animated entry ── */
+.slide.active .anim{animation:fadeUp .6s var(--ease) both}
+.slide.active .anim:nth-child(1){animation-delay:.05s}
+.slide.active .anim:nth-child(2){animation-delay:.15s}
+.slide.active .anim:nth-child(3){animation-delay:.25s}
+.slide.active .anim:nth-child(4){animation-delay:.35s}
+.slide.active .anim:nth-child(5){animation-delay:.45s}
+.slide.active .anim:nth-child(6){animation-delay:.55s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Nav ── */
+#nav{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:100}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s}
+.dot.on{background:var(--moss);transform:scale(1.25)}
+#counter{position:fixed;top:20px;right:28px;font-size:13px;color:rgba(255,255,255,.5);z-index:100;font-family:'Noto Sans KR',sans-serif}
+#progress{position:fixed;top:0;left:0;height:3px;background:var(--moss);transition:width .4s var(--ease);z-index:100}
+
+/* ── Arrows ── */
+#prev,#next{position:fixed;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);
+  font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100;
+  transition:all .2s}
+#prev:hover,#next:hover{background:rgba(255,255,255,.15);color:#fff}
+#prev{left:16px}#next{right:16px}
+
+/* ── Typography ── */
+.eyebrow{font-size:clamp(11px,1.2vw,13px);letter-spacing:.12em;text-transform:uppercase;color:var(--moss);font-weight:500;margin-bottom:.5rem}
+.display{font-family:'Noto Serif KR',serif;font-size:clamp(36px,5.5vw,68px);line-height:1.1;font-weight:700}
+.headline{font-family:'Noto Serif KR',serif;font-size:clamp(24px,3.5vw,42px);line-height:1.2;font-weight:700}
+.subhead{font-size:clamp(14px,1.6vw,19px);line-height:1.6;color:rgba(255,255,255,.7)}
+.subhead.dark-on-light{color:var(--muted)}
+.label{font-size:clamp(10px,1vw,12px);text-transform:uppercase;letter-spacing:.1em;font-weight:500}
+
+/* ── Cards ── */
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%;max-width:960px}
+.cards2{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;width:100%;max-width:900px}
+.card{border-radius:16px;padding:clamp(18px,2.5vw,30px);display:flex;flex-direction:column;gap:12px}
+.card-white{background:#fff;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.card-dark{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)}
+.card-red{background:#E53935;color:#fff}
+.card-orange{background:#F57C00;color:#fff}
+.card-purple{background:#6A1B9A;color:#fff}
+.icon-circle{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.icon-circle.green{background:var(--green);color:#fff}
+.icon-circle.white{background:rgba(255,255,255,.2);color:#fff}
+.icon-circle.light{background:#E8F5E9}
+
+/* ── Slide 1: Title ── */
+#s1{text-align:center;gap:1rem}
+.leaf-wrap{font-size:clamp(48px,6vw,72px);margin-bottom:.25rem}
+.tech-badges{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:1rem}
+.badge{padding:5px 14px;border:1px solid rgba(151,188,98,.4);border-radius:20px;font-size:12px;color:rgba(151,188,98,.9)}
+.divider{width:120px;height:1px;background:rgba(151,188,98,.3);margin:.75rem auto}
+
+/* ── Slide 2: Problem ── */
+#s2{gap:2rem}
+.s2-head{text-align:center;width:100%;max-width:700px}
+
+/* ── Slide 3: Solution ── */
+#s3{gap:2rem;text-align:center}
+.flow{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;max-width:900px;width:100%}
+.flow-step{display:flex;flex-direction:column;align-items:center;gap:10px;flex:1;min-width:180px}
+.flow-circle{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px}
+.flow-arrow{font-size:28px;color:var(--moss);flex-shrink:0}
+.flow-label{font-size:clamp(14px,1.5vw,17px);font-weight:700;color:#fff}
+.flow-sub{font-size:13px;color:rgba(151,188,98,.85);line-height:1.5}
+
+/* ── Slide 4: AI Feature ── */
+#s4{flex-direction:row;gap:4vw;align-items:center}
+.s4-left{flex:1;display:flex;flex-direction:column;gap:1rem;max-width:440px}
+.feature-row{display:flex;align-items:flex-start;gap:12px;margin-top:.25rem}
+.feature-dot{width:8px;height:8px;border-radius:50%;background:var(--moss);margin-top:8px;flex-shrink:0}
+.feature-text{font-size:clamp(12px,1.3vw,15px);color:var(--muted);line-height:1.6}
+.phone-wrap{flex:0 0 auto;width:clamp(200px,22vw,280px)}
+.phone{background:var(--forest);border-radius:32px;padding:16px 14px 20px;display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 60px rgba(0,0,0,.2);border:6px solid #111;position:relative}
+.phone-notch{width:60px;height:5px;background:rgba(255,255,255,.12);border-radius:3px;margin:0 auto 8px}
+.phone-label{font-size:11px;color:var(--moss);font-weight:500}
+.phone-input{background:rgba(151,188,98,.12);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--moss);font-style:italic;min-height:52px;line-height:1.5;font-family:'Noto Sans KR',sans-serif}
+.phone-analyzing{font-size:12px;color:var(--moss);display:flex;align-items:center;gap:6px;padding:4px 0}
+.phone-card{background:rgba(255,255,255,.08);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.phone-card-row{display:flex;justify-content:space-between;align-items:baseline}
+.phone-card-name{font-size:13px;font-weight:700;color:#fff}
+.phone-card-cal{font-size:13px;font-weight:700;color:var(--moss)}
+.phone-card-macro{font-size:10px;color:rgba(151,188,98,.7)}
+.typing-cursor{display:inline-block;width:1px;height:12px;background:var(--moss);animation:blink .8s infinite;vertical-align:middle;margin-left:1px}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+
+/* Typing animation */
+.typing-text{overflow:hidden;white-space:nowrap;border-right:none}
+.phone-results{display:flex;flex-direction:column;gap:8px}
+.fade-in{animation:fadeIn .5s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.analyze-btn{background:var(--green);border-radius:8px;padding:8px 12px;text-align:center;font-size:12px;font-weight:700;color:#fff;cursor:pointer}
+
+/* ── Slide 5: Goals ── */
+#s5{gap:1.5rem}
+.s5-head{text-align:left;width:100%;max-width:900px}
+.goals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;width:100%;max-width:900px}
+.goal-card{background:#fff;border-radius:16px;padding:24px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;box-shadow:0 2px 16px rgba(0,0,0,.07)}
+.goal-icon{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px}
+.goal-title{font-size:clamp(18px,2vw,22px);font-weight:700}
+.goal-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.bmr-note{background:rgba(44,95,45,.08);border-radius:8px;padding:10px 18px;font-size:12px;color:var(--green);width:100%;max-width:900px;text-align:left}
+
+/* ── Slide 6: Exercise/Report ── */
+#s6{gap:1.5rem}
+.s6-head{width:100%;max-width:900px}
+.s6-body{display:grid;grid-template-columns:1fr 1fr;gap:18px;width:100%;max-width:900px;align-items:start}
+.s6-features{display:flex;flex-direction:column;gap:14px}
+.feat-card{background:#fff;border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.feat-card-body{display:flex;flex-direction:column;gap:4px}
+.feat-card-title{font-size:15px;font-weight:700;color:var(--green)}
+.feat-card-desc{font-size:12px;color:var(--muted);line-height:1.55}
+.mini-chart{background:var(--forest);border-radius:16px;padding:18px 16px;color:#fff;box-shadow:0 2px 16px rgba(0,0,0,.12)}
+.chart-title{font-size:13px;font-weight:700;color:var(--moss);margin-bottom:14px}
+.bars{display:flex;align-items:flex-end;gap:6px;height:90px;border-bottom:1px solid rgba(151,188,98,.2);padding-bottom:4px;position:relative}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+.bar{border-radius:3px 3px 0 0;width:100%;transition:height .8s var(--ease)}
+.bar-label{font-size:9px;color:rgba(151,188,98,.7);margin-top:4px}
+.goal-line{position:absolute;bottom:42%;left:0;right:0;border-top:1px dashed #FFEE58;display:flex;justify-content:flex-end}
+.goal-line-label{font-size:8px;color:#FFEE58;margin-top:-10px;padding-right:2px}
+
+/* ── Slide 7: Demo ── */
+#s7{text-align:center;gap:1rem;padding:2.5vw 4vw}
+.demo-header{display:flex;align-items:center;justify-content:center;gap:12px}
+.demo-badge{background:var(--moss);color:var(--forest);font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase}
+.video-shell{position:relative;width:100%;max-width:900px;background:#000;border-radius:16px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.video-shell video{display:block;width:100%;max-height:72vh;object-fit:contain;background:#000}
+.video-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);cursor:pointer;transition:opacity .25s}
+.video-overlay.hidden{opacity:0;pointer-events:none}
+.play-btn{width:72px;height:72px;border-radius:50%;background:var(--moss);display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.play-btn svg{width:28px;height:28px;fill:var(--forest);margin-left:4px}
+.video-overlay:hover .play-btn{transform:scale(1.08)}
+
+/* ── Slide 8: Tech ── */
+#s8{gap:1.5rem}
+.s8-head{width:100%;max-width:800px;text-align:left}
+.tech-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;width:100%;max-width:800px}
+.tech-card{border-radius:16px;padding:22px 22px;display:flex;gap:16px;align-items:flex-start}
+.tech-card.blue-card{background:var(--blue)}
+.tech-card.green-card{background:#E8F5E9}
+.tech-card.light-card{background:#fff;border:1px solid #dde;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+.tech-card.forest-card{background:var(--green)}
+.tech-label{font-size:clamp(14px,1.5vw,17px);font-weight:700;line-height:1.3}
+.tech-desc{font-size:12px;line-height:1.6;margin-top:4px}
+.tech-card.blue-card .tech-label,.tech-card.blue-card .tech-desc{color:#fff}
+.tech-card.blue-card .tech-desc{opacity:.8}
+.tech-card.green-card .tech-label{color:var(--green)}
+.tech-card.green-card .tech-desc{color:var(--muted)}
+.tech-card.light-card .tech-label{color:var(--text)}
+.tech-card.light-card .tech-desc{color:var(--muted)}
+.tech-card.forest-card .tech-label,.tech-card.forest-card .tech-desc{color:#fff}
+.tech-card.forest-card .tech-desc{opacity:.8}
+.tech-icon{font-size:28px;flex-shrink:0;margin-top:2px}
+
+/* ── Slide 9: Close ── */
+#s9{text-align:center;gap:1.25rem}
+.summary-items{display:flex;flex-direction:column;gap:10px;margin-top:.5rem;max-width:480px}
+.summ-row{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.07);border-radius:10px;padding:12px 18px;text-align:left;font-size:clamp(13px,1.4vw,15px);color:rgba(255,255,255,.85)}
+.summ-icon{font-size:18px;flex-shrink:0}
+.qa-btn{margin-top:1rem;padding:14px 44px;background:var(--moss);border:none;border-radius:30px;font-size:clamp(16px,1.8vw,20px);font-weight:700;color:var(--forest);cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:transform .15s,opacity .15s}
+.qa-btn:hover{transform:scale(1.03);opacity:.92}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="counter">1 / 9</div>
+<button id="prev" aria-label="이전 슬라이드">&#8592;</button>
+<button id="next" aria-label="다음 슬라이드">&#8594;</button>
+
+<div class="deck" id="deck">
+
+  <!-- ── S1: Title ── -->
+  <section class="slide dark" id="s1">
+    <div class="leaf-wrap anim">🌿</div>
+    <div class="display anim">NutriSnap</div>
+    <div class="divider anim"></div>
+    <p class="subhead anim" style="font-size:clamp(15px,2vw,22px);color:var(--moss)">AI가 내 식단을 기억하고, 분석하고, 코칭합니다</p>
+    <div class="tech-badges anim">
+      <span class="badge">React Native</span>
+      <span class="badge">Expo</span>
+      <span class="badge">Claude AI</span>
+      <span class="badge">TypeScript</span>
+    </div>
+  </section>
+
+  <!-- ── S2: Problem ── -->
+  <section class="slide light" id="s2">
+    <div class="s2-head anim">
+      <div class="eyebrow" style="color:var(--green)">왜 만들었나</div>
+      <div class="headline" style="color:var(--forest)">식단 기록, 왜 포기하게 될까요?</div>
+    </div>
+    <div class="cards3 anim">
+      <div class="card card-red anim">
+        <div class="icon-circle white">🍔</div>
+        <div style="font-size:18px;font-weight:700">복잡한 검색</div>
+        <div style="font-size:13px;opacity:.85;line-height:1.6">먹은 음식을 데이터베이스에서 일일이 검색해야 합니다. 자주 먹는 음식도 매번 찾아야 하죠.</div>
+      </div>
+      <div class="card card-orange anim">
+        <div class="icon-circle white">🤖</div>
+        <div style="font-size:18px;font-weight:700">부정확한 양 입력</div>
+        <div style="font-size:13px;opacity:.85;line-height:1.6">"비빔밥 1인분"이 몇 g인지 어떻게 알죠? 모르면 입력 자체가 막힙니다.</div>
+      </div>
+      <div class="card card-purple anim">
+        <div class="icon-circle white">📊</div>
+        <div style="font-size:18px;font-weight:700">목표 없는 기록</div>
+        <div style="font-size:13px;opacity:.85;line-height:1.6">내 몸에 맞는 칼로리 목표가 없으니 기록이 의미 없고 결국 포기하게 됩니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── S3: Solution ── -->
+  <section class="slide dark" id="s3">
+    <div class="anim" style="text-align:center">
+      <div class="eyebrow">그래서 만들었습니다</div>
+      <div class="display">NutriSnap</div>
+    </div>
+    <div class="flow anim">
+      <div class="flow-step anim">
+        <div class="flow-circle" style="background:var(--green)">🍽️</div>
+        <div class="flow-label">먹은 것 입력</div>
+        <div class="flow-sub">"비빔밥 1인분,<br>된장국 한 그릇"</div>
+      </div>
+      <div class="flow-arrow anim">→</div>
+      <div class="flow-step anim">
+        <div class="flow-circle" style="background:#1565C0">🤖</div>
+        <div class="flow-label">Claude AI 분석</div>
+        <div class="flow-sub">자동 영양소<br>계산 &amp; 정리</div>
+      </div>
+      <div class="flow-arrow anim">→</div>
+      <div class="flow-step anim">
+        <div class="flow-circle" style="background:#6A1B9A">📈</div>
+        <div class="flow-label">결과 확인</div>
+        <div class="flow-sub">칼로리 · 탄단지<br>목표 대비 현황</div>
+      </div>
+    </div>
+    <p class="subhead anim" style="max-width:560px;text-align:center;font-size:clamp(13px,1.5vw,17px)">검색도 없고, 그램 수도 몰라도 됩니다</p>
+  </section>
+
+  <!-- ── S4: AI Analysis ── -->
+  <section class="slide light" id="s4">
+    <div class="s4-left">
+      <div class="anim">
+        <div class="eyebrow">핵심 기능 01</div>
+        <div class="headline" style="color:var(--forest)">AI 식사 분석</div>
+      </div>
+      <p class="subhead dark-on-light anim" style="font-size:clamp(12px,1.3vw,15px)">Claude Sonnet이 자연어로 입력된 음식을 즉시 인식하고 영양소를 계산합니다.</p>
+      <div class="anim" style="display:flex;flex-direction:column;gap:10px;margin-top:.5rem">
+        <div class="feature-row">
+          <div class="feature-dot"></div>
+          <span class="feature-text">한국 음식 자연어 인식 — "비빔밥 1인분", "된장국 한 그릇" 등</span>
+        </div>
+        <div class="feature-row">
+          <div class="feature-dot"></div>
+          <span class="feature-text">칼로리 · 탄수화물 · 단백질 · 지방 자동 분류</span>
+        </div>
+        <div class="feature-row">
+          <div class="feature-dot"></div>
+          <span class="feature-text">즐겨찾기 등록으로 반복 입력 간소화</span>
+        </div>
+      </div>
+    </div>
+    <div class="phone-wrap anim">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-label">🍽️ 식사 추가</div>
+        <div class="phone-input" id="phone-input"><span class="typing-cursor"></span></div>
+        <div class="analyze-btn" id="analyze-btn" style="opacity:.3">AI 분석하기</div>
+        <div id="phone-results" style="display:none;flex-direction:column;gap:8px">
+          <div class="phone-analyzing">✓ 분석 완료</div>
+          <div class="phone-card fade-in">
+            <div class="phone-card-row"><span class="phone-card-name">비빔밥</span><span class="phone-card-cal">450 kcal</span></div>
+            <div class="phone-card-macro">탄 82g · 단 15g · 지 8g</div>
+          </div>
+          <div class="phone-card fade-in" style="animation-delay:.15s">
+            <div class="phone-card-row"><span class="phone-card-name">된장국</span><span class="phone-card-cal">60 kcal</span></div>
+            <div class="phone-card-macro">탄 4g · 단 5g · 지 2g</div>
+          </div>
+          <div style="background:var(--moss);border-radius:8px;padding:8px;text-align:center;font-size:12px;font-weight:700;color:var(--forest);margin-top:2px;animation:fadeIn .5s .3s both">식사 저장</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── S5: Goals ── -->
+  <section class="slide light" id="s5">
+    <div class="s5-head anim">
+      <div class="eyebrow" style="color:var(--green)">핵심 기능 02</div>
+      <div class="headline" style="color:var(--forest)">맞춤형 목표 설정</div>
+      <p style="font-size:clamp(12px,1.3vw,15px);color:var(--muted);margin-top:.4rem">키 · 체중 · 체지방률 입력만으로 BMR 기반 개인 맞춤 칼로리 목표를 자동 계산합니다.</p>
+    </div>
+    <div class="bmr-note anim">▸ Mifflin-St Jeor 공식 기반 BMR 자동 계산 · 체중 기록 연동 · 탄단지 목표 자동 분배</div>
+    <div class="goals-grid anim">
+      <div class="goal-card anim">
+        <div class="goal-icon" style="background:#FFF3E0">🍎</div>
+        <div class="goal-title" style="color:#E65100">감량</div>
+        <div class="goal-desc">주간 목표 감량 속도 설정<br>칼로리 적자 자동 산출</div>
+      </div>
+      <div class="goal-card anim">
+        <div class="goal-icon" style="background:#E8F5E9">🧘</div>
+        <div class="goal-title" style="color:var(--green)">유지</div>
+        <div class="goal-desc">현재 체중을 안정적으로<br>유지하는 목표</div>
+      </div>
+      <div class="goal-card anim">
+        <div class="goal-icon" style="background:#E3F2FD">🏋️</div>
+        <div class="goal-title" style="color:#0D47A1">증량</div>
+        <div class="goal-desc">근육량 증가를 위한<br>칼로리 잉여 목표 설정</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── S6: Exercise & Report ── -->
+  <section class="slide light" id="s6">
+    <div class="s6-head anim">
+      <div class="eyebrow" style="color:var(--green)">핵심 기능 03</div>
+      <div class="headline" style="color:var(--forest)">운동 추적 · 주간 리포트 · AI 코치</div>
+    </div>
+    <div class="s6-body anim">
+      <div class="s6-features">
+        <div class="feat-card">
+          <div class="icon-circle light" style="background:#E8F5E9">💪</div>
+          <div class="feat-card-body">
+            <div class="feat-card-title">운동 칼로리 추적</div>
+            <div class="feat-card-desc">걷기 · 달리기 등 10가지 프리셋 + 커스텀 운동. 소모 칼로리가 실시간으로 순 칼로리에 반영됩니다.</div>
+          </div>
+        </div>
+        <div class="feat-card">
+          <div class="icon-circle light" style="background:#E8F5E9">📊</div>
+          <div class="feat-card-body">
+            <div class="feat-card-title">주간 영양 리포트</div>
+            <div class="feat-card-desc">월–일 칼로리 막대 차트 + 탄단지 도넛 차트. 한 주의 식습관을 한눈에 파악할 수 있습니다.</div>
+          </div>
+        </div>
+        <div class="feat-card">
+          <div class="icon-circle light" style="background:#E8F5E9">🧠</div>
+          <div class="feat-card-body">
+            <div class="feat-card-title">AI 코치 피드백</div>
+            <div class="feat-card-desc">Claude가 한 주 데이터를 분석해 개인화된 식단 개선 제안과 격려 메시지를 제공합니다.</div>
+          </div>
+        </div>
+      </div>
+      <div class="mini-chart anim">
+        <div class="chart-title">📊 주간 리포트</div>
+        <div class="bars" id="bars">
+          <div class="goal-line"><span class="goal-line-label">목표 2000</span></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:2px">
+          <span id="bl0" class="bar-label" style="flex:1;text-align:center">월</span>
+          <span id="bl1" class="bar-label" style="flex:1;text-align:center">화</span>
+          <span id="bl2" class="bar-label" style="flex:1;text-align:center">수</span>
+          <span id="bl3" class="bar-label" style="flex:1;text-align:center">목</span>
+          <span id="bl4" class="bar-label" style="flex:1;text-align:center">금</span>
+          <span id="bl5" class="bar-label" style="flex:1;text-align:center">토</span>
+          <span id="bl6" class="bar-label" style="flex:1;text-align:center">일</span>
+        </div>
+        <div style="margin-top:12px;font-size:11px;color:rgba(151,188,98,.6);line-height:1.6">이번 주 평균 1,986 kcal<br><span style="color:var(--moss)">목표 달성률 78%</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- S7: Demo -->
+  <section class="slide dark" id="s7">
+    <div class="demo-header anim">
+      <span class="demo-badge">Live Demo</span>
+      <span style="font-size:clamp(18px,2.2vw,26px);font-family:'Noto Serif KR',serif;font-weight:700;color:#fff">NutriSnap 시연</span>
+    </div>
+    <div class="video-shell anim">
+      <video id="demo-video" src="NutriSnap_실제시현.mp4" preload="metadata" playsinline></video>
+      <div class="video-overlay" id="video-overlay">
+        <div class="play-btn">
+          <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── S8: Tech Stack ── -->
+  <section class="slide light" id="s8">
+    <div class="s8-head anim">
+      <div class="eyebrow" style="color:var(--green)">기술 스택</div>
+      <div class="headline" style="color:var(--forest)">어떻게 만들었나</div>
+    </div>
+    <div class="tech-grid anim">
+      <div class="tech-card blue-card anim">
+        <div class="tech-icon">📱</div>
+        <div>
+          <div class="tech-label">React Native + Expo</div>
+          <div class="tech-desc">iOS · Android 크로스플랫폼.<br>Expo Router로 파일 기반 라우팅.</div>
+        </div>
+      </div>
+      <div class="tech-card light-card anim">
+        <div class="tech-icon">⌨️</div>
+        <div>
+          <div class="tech-label" style="color:var(--text)">TypeScript</div>
+          <div class="tech-desc">타입 안전 코드베이스.<br>런타임 에러 사전 방지.</div>
+        </div>
+      </div>
+      <div class="tech-card green-card anim">
+        <div class="tech-icon">🧠</div>
+        <div>
+          <div class="tech-label">Claude API (Sonnet 4.6)</div>
+          <div class="tech-desc">AI 식사 분석 + AI 코치.<br>Anthropic API 직접 연동.</div>
+        </div>
+      </div>
+      <div class="tech-card forest-card anim">
+        <div class="tech-icon">💾</div>
+        <div>
+          <div class="tech-label">AsyncStorage</div>
+          <div class="tech-desc">식사 · 운동 · 체중 로컬 저장.<br>오프라인 완전 동작.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── S9: Close ── -->
+  <section class="slide dark" id="s9">
+    <div class="anim" style="font-size:clamp(40px,5.5vw,60px)">🌿</div>
+    <div class="display anim">NutriSnap</div>
+    <p class="subhead anim" style="color:var(--moss);font-size:clamp(14px,1.7vw,20px)">말하면 AI가 분석하고, 데이터가 나를 코칭합니다</p>
+    <div class="summary-items anim">
+      <div class="summ-row"><span class="summ-icon">🍽️</span>자연어 입력 → AI 즉시 분석</div>
+      <div class="summ-row"><span class="summ-icon">🎯</span>BMR 기반 개인 맞춤 목표</div>
+      <div class="summ-row"><span class="summ-icon">📊</span>주간 리포트 + AI 코치 피드백</div>
+    </div>
+    <button class="qa-btn anim">Q &amp; A</button>
+  </section>
+
+</div>
+
+<!-- Nav dots -->
+<div id="nav">
+  <div class="dot on" data-i="0"></div>
+  <div class="dot" data-i="1"></div>
+  <div class="dot" data-i="2"></div>
+  <div class="dot" data-i="3"></div>
+  <div class="dot" data-i="4"></div>
+  <div class="dot" data-i="5"></div>
+  <div class="dot" data-i="6"></div>
+  <div class="dot" data-i="7"></div>
+  <div class="dot" data-i="8"></div>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const dots = document.querySelectorAll('.dot');
+const counter = document.getElementById('counter');
+const progress = document.getElementById('progress');
+let cur = 0;
+let animating = false;
+
+function go(n) {
+  if (animating || n === cur) return;
+  animating = true;
+  const prev = cur;
+  cur = Math.max(0, Math.min(slides.length - 1, n));
+
+  slides[prev].classList.remove('active');
+  slides[prev].classList.add('exit');
+  setTimeout(() => slides[prev].classList.remove('exit'), 600);
+
+  slides[cur].classList.add('active');
+  dots.forEach((d,i) => d.classList.toggle('on', i === cur));
+  counter.textContent = (cur+1) + ' / ' + slides.length;
+  progress.style.width = ((cur+1)/slides.length*100) + '%';
+
+  if (cur === 3) startPhoneAnim();
+  if (cur === 5) startBars();
+
+  const vid = document.getElementById('demo-video');
+  if (vid && prev === 6) vid.pause();
+
+  setTimeout(() => { animating = false; }, 600);
+}
+
+document.getElementById('prev').onclick = () => go(cur - 1);
+document.getElementById('next').onclick = () => go(cur + 1);
+document.querySelectorAll('.dot').forEach(d => d.onclick = () => go(+d.dataset.i));
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); go(cur+1); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); go(cur-1); }
+});
+
+// Touch / swipe
+let tx0 = null;
+document.addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  if (tx0 === null) return;
+  const dx = e.changedTouches[0].clientX - tx0;
+  if (Math.abs(dx) > 50) go(dx < 0 ? cur+1 : cur-1);
+  tx0 = null;
+});
+
+// Init first slide
+slides[0].classList.add('active');
+progress.style.width = (1/slides.length*100)+'%';
+
+// ── Phone Typing Animation (Slide 4) ──
+let phoneAnimDone = false;
+function startPhoneAnim() {
+  if (phoneAnimDone) return;
+  phoneAnimDone = true;
+  const input = document.getElementById('phone-input');
+  const btn = document.getElementById('analyze-btn');
+  const results = document.getElementById('phone-results');
+  const text = '비빔밥 1인분, 된장국 한 그릇';
+  let i = 0;
+  input.innerHTML = '<span class="typing-cursor"></span>';
+
+  const type = setInterval(() => {
+    if (i >= text.length) {
+      clearInterval(type);
+      btn.style.opacity = '1';
+      setTimeout(() => {
+        btn.style.background = '#388E3C';
+        setTimeout(() => {
+          input.style.borderBottom = '1px solid rgba(151,188,98,.4)';
+          results.style.display = 'flex';
+        }, 700);
+      }, 800);
+      return;
+    }
+    input.innerHTML = text.slice(0, ++i) + '<span class="typing-cursor"></span>';
+  }, 80);
+}
+
+// ── Bar Chart Animation (Slide 6) ──
+let barsAnimDone = false;
+function startBars() {
+  if (barsAnimDone) return;
+  barsAnimDone = true;
+  const barsEl = document.getElementById('bars');
+  const data = [1800, 2100, 1650, 2300, 1950, 2400, 1700];
+  const maxH = 80;
+  const maxCal = 2400;
+  data.forEach((c, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'bar-wrap';
+    wrap.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%';
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    const h = Math.round(c / maxCal * maxH);
+    bar.style.cssText = `width:100%;height:0;background:${c > 2200 ? '#E53935' : '#97BC62'};border-radius:3px 3px 0 0;transition:height .8s cubic-bezier(.22,1,.36,1) ${i*0.08}s`;
+    wrap.appendChild(bar);
+    barsEl.appendChild(wrap);
+    setTimeout(() => { bar.style.height = h + 'px'; }, 50);
+  });
+}
+
+const demoVideo = document.getElementById('demo-video');
+const videoOverlay = document.getElementById('video-overlay');
+if (demoVideo && videoOverlay) {
+  videoOverlay.addEventListener('click', () => {
+    demoVideo.play();
+    videoOverlay.classList.add('hidden');
+  });
+  demoVideo.addEventListener('click', () => {
+    if (demoVideo.paused) { demoVideo.play(); videoOverlay.classList.add('hidden'); }
+    else { demoVideo.pause(); videoOverlay.classList.remove('hidden'); }
+  });
+  demoVideo.addEventListener('ended', () => {
+    videoOverlay.classList.remove('hidden');
+    demoVideo.currentTime = 0;
+  });
+}
+</script>
+</body>
+</html>
